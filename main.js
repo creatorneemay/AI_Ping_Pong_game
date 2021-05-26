@@ -1,4 +1,7 @@
-
+rightX="";
+rightY="";
+rights="";
+gamestatus="";
 /*created by prashant shukla */
 
 var paddle2 =10,paddle1=10;
@@ -22,14 +25,35 @@ var ball = {
 }
 
 function setup(){
-  var canvas =  createCanvas(700,600);
+  canvas=createCanvas(700,600);
+  canvas.parent("canvas");
+	video=createCapture(VIDEO);
+  video.size(700,600);
+  video.hide();
+	posenet=ml5.poseNet(video,modelloaded);
+	posenet.on('pose',gotposes);
+}
+function modelloaded(){
+	console.log("model loaded");
+}
+function gotposes(results){
+   if(results.length>0){
+	   console.log(results);
+	    rightX=results[0].pose.rightWrist.x;
+       rightY=results[0].pose.rightWrist.y;
+       rights=results[0].pose.keypoints[10].score
+   } 
+}
+function startgame(){
+  gamestatus="start";
+  document.getElementById("status").innerHTML="Game is Loading"
 }
 
 
 function draw(){
-
+if(gamestatus=="start"){
  background(0); 
-
+ image(video,0,0,700,600);
  fill("black");
  stroke("black");
  rect(680,0,20,700);
@@ -37,7 +61,10 @@ function draw(){
  fill("black");
  stroke("black");
  rect(0,0,20,700);
- 
+ if(rights>0.2){
+   fill("red")
+   circle(rightX,rightY,20)
+ }
    //funtion paddleInCanvas call 
    paddleInCanvas();
  
@@ -45,7 +72,7 @@ function draw(){
    fill(250,0,0);
     stroke(0,0,250);
     strokeWeight(0.5);
-   paddle1Y = mouseY; 
+   paddle1Y = rightY; 
    rect(paddle1X,paddle1Y,paddle1,paddle1Height,100);
    
    
@@ -65,6 +92,7 @@ function draw(){
    
    //function move call which in very important
     move();
+}
 }
 
 
